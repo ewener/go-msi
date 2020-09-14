@@ -44,7 +44,8 @@ func GenerateCmd(wixFile *manifest.WixManifest, templates []string, msiOutFile s
 		cmd += " " + filepath.Base(tpl)
 	}
 	cmd += eol
-	cmd += "light -ext WixUIExtension -ext WixUtilExtension -sacl -spdb "
+	// 添加-cultures:zh-CN 以支持中文
+	cmd += "light -ext WixUIExtension -ext WixUtilExtension -cultures:zh-CN -sacl -spdb "
 	cmd += " -out " + msiOutFile
 	for i := range wixFile.Directories {
 		sI := strconv.Itoa(i)
