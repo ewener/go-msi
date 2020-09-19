@@ -60,34 +60,37 @@
         </Component>
         {{end}}
 
-         {{if gt (.Shortcuts.Items | len) 0}}
-         <Directory Id="ProgramMenuFolder">
-            <Directory Id="ProgramMenuSubfolder" Name="{{.Product}}">
-               <Component Id="ApplicationShortcuts" Guid="{{.Shortcuts.GUID}}">
-               {{range $i, $e := .Shortcuts.Items}}
-                  <Shortcut Id="ApplicationShortcut{{$i}}"
-                        Name="{{$e.Name}}"
-                        Description="{{$e.Description}}"
-                        Target="{{$e.Target}}"
-                        WorkingDirectory="{{$e.WDir}}"
-                        {{if gt ($e.Arguments | len) 0}}
-                        Arguments="{{$e.Arguments}}"
-                        {{end}}
-                        >
-                        {{if gt ($e.Icon | len) 0}}
-                        <Icon Id="Icon{{$i}}" SourceFile="{{$e.Icon}}" />
-                        {{end}}
-                  </Shortcut>
-                  <RegistryValue Root="HKCU"
-                    Key="Software\{{$.Company}}\{{$.Product}}"
-                    Name="installed{{$i}}"
-                    Type="integer" Value="1" KeyPath="yes"/>
-                {{end}}
-                <RemoveFolder Id="ProgramMenuSubfolder" On="uninstall"/>
-               </Component>
-            </Directory>
-         </Directory>
-         {{end}}
+        <Component Id="Register">
+            <RegistryKey ForceCreateOnInstall="yes" Id="AutoStarKey" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run">
+                 <RegistryValue Id="autoStarKeyValue" Name="{{.Product}}"  KeyPath="yes"  Type="string" Value="[INSTALLDIR]{{.Product}}.exe" />
+            </RegistryKey>
+        </Component>
+
+        {{if gt (.Shortcuts.Items | len) 0}}
+        <Directory Id="DesktopFolder">
+              <Component Id="DesktopFolderShortcut" Guid="{{.Shortcuts.GUID}}">
+              {{range $i, $e := .Shortcuts.Items}}
+                   <Shortcut Id="ApplicationDesktopShortcut{{$i}}"
+                                           Name="{{$e.Name}}"
+                                           Description="{{$e.Description}}"
+                                           Target="{{$e.Target}}"
+                                           WorkingDirectory="{{$e.WDir}}"
+                                           {{if gt ($e.Arguments | len) 0}}
+                                           Arguments="{{$e.Arguments}}"
+                                           {{end}}
+                                           >
+                                           {{if gt ($e.Icon | len) 0}}
+                                           <Icon Id="Icon{{$i}}" SourceFile="{{$e.Icon}}" />
+                                           {{end}}
+                    </Shortcut>
+                    <RegistryValue Root="HKCU"
+                                        Key="Software\{{$.Company}}\{{$.Product}}"
+                                        Name="installed{{$i}}"
+                                        Type="integer" Value="1" KeyPath="yes"/>
+              {{end}}
+              </Component>
+        </Directory>
+        {{end}}
 
       </Directory>
 
@@ -117,11 +120,12 @@
          <ComponentRef Id="ApplicationFiles"/>
          {{end}}
          {{if gt (.Shortcuts.Items | len) 0}}
-         <ComponentRef Id="ApplicationShortcuts"/>
+         <ComponentRef Id="DesktopFolderShortcut" />
          {{end}}
          {{range $i, $e := .Directories}}
          <ComponentGroupRef Id="AppFiles{{$i}}" />
          {{end}}
+         <ComponentRef Id="Register" />
       </Feature>
 
       <UI>
